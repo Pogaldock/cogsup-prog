@@ -1,0 +1,18 @@
+#Expyriment 1.0.0 (Python 3.11.3), .xpe-file, coding: cp1252
+#date: Wed Sep 17 2025 19:26:51
+#sha1: af93dd
+#modules: 
+#display: size=(800, 600), window_mode=True, opengl=2
+#os: uname_result(system='Windows', node='RowanLunch', release='10', version='10.0.26120', machine='AMD64')
+Time,Type,Event,Value,Detail,Detail2
+895,design,log,
+#design: #exp: Circle
+#design: block_cnt,block_id,trial_cnt,trial_id
+895,design,logged,
+895,Experiment,started
+896,Stimulus,presented,0
+897,Stimulus,presented,1
+1897,stderr,received,'Traceback (most recent call last):'
+1898,stderr,received,'  File "C:\\Users\\Rowlu\\Documents\\Rowan\\University\\M1 2025-2026\\Courses\\Coding\\assignments\\week-2\\exercises\\launching.py", line 25, in <module>'
+1898,stderr,received,'    square_red.move((-400,0),(0,0))'
+1898,stderr,received,'TypeError: Visual.move() takes 2 positional arguments but 3 were given'
