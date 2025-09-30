@@ -1,65 +1,45 @@
 from expyriment import design, control, stimuli
 
-def run_launching_sequence(temporal_gap_ms=200, spatial_gap_px=80, speedup_factor=3.0):
-    control.defaults.initialise_delay = 0
-    control.defaults.window_mode = True
-    control.defaults.fast_quit = True
+control.defaults.initialise_delay = 0
+control.defaults.window_mode = True
+control.defaults.fast_quit = True
 
-    exp = design.Experiment("Launching")
-    control.initialize(exp)
-    control.start(subject_id=1)
+exp = design.Experiment(name="Moving Square")
+control.initialize(exp)
 
-    SIZE = 50
-    RED_START = -400
-    CENTER = 0
-    GREEN_START = CENTER
-    GREEN_END = 400
-    RED_TOUCH = CENTER - SIZE
-    step = 6
-    frame = 16
+# start at left side
+square_red = stimuli.Rectangle((50, 50), colour='red', position=(-400, 0))
+square_green = stimuli.Rectangle((50, 50), colour='green', position=(0, 0))
 
-    def draw(r, g):
-        g.present(clear=True, update=False)
-        r.present(clear=False, update=True)
+control.start(subject_id=1)
 
-    def move_x(sq, target, sp, other):
-        dx = sp if sq.position[0] < target else -sp
-        while (dx > 0 and sq.position[0] < target) or (dx < 0 and sq.position[0] > target):
-            x, y = sq.position
-            sq.position = (x + dx, y)
-            draw(r=sq, g=other)
-            exp.clock.wait(frame)
+# Present both once initially
+square_green.present(clear=True, update=False)
+square_red.present(clear=False, update=True)
 
-    def fresh():
-        r = stimuli.Rectangle((SIZE, SIZE), "red", (RED_START, 0))
-        g = stimuli.Rectangle((SIZE, SIZE), "green", (GREEN_START, 0))
-        draw(r, g)
-        exp.clock.wait(250)
-        return r, g
+# Move red square step by step to center
+target_x_red = -50 
+target_x_green = 400 # final position of the green square
+step = 5  # pixels per frame
 
-    # 1: Michotte
-    red, green = fresh()
-    move_x(red, RED_TOUCH, step, green)
-    move_x(green, GREEN_END, step, red)
-    exp.clock.wait(300)
+while square_red.position[0] < target_x_red:
+    # update position
+    x, y = square_red.position
+    square_red.position = (x + step, y)
 
-    # 2: Temporal gap
-    red, green = fresh()
-    move_x(red, RED_TOUCH, step, green)
-    exp.clock.wait(temporal_gap_ms)
-    move_x(green, GREEN_END, step, red)
-    exp.clock.wait(300)
+    # redraw both squares
+    square_green.present(clear=True, update=False)
+    square_red.present(clear=False, update=True)
 
-    # 3: Spatial gap
-    red, green = fresh()
-    move_x(red, RED_TOUCH - spatial_gap_px, step, green)
-    move_x(green, GREEN_END, step, red)
-    exp.clock.wait(300)
+while square_green.position[0] < target_x_green:
+    # update position
+    x, y = square_green.position
+    square_green.position = (x + step, y)
 
-    # 4: Triggering
-    red, green = fresh()
-    move_x(red, RED_TOUCH, step, green)
-    move_x(green, GREEN_END, int(step * speedup_factor), red)
+    # redraw both squares
+    square_green.present(clear=True, update=False)
+    square_red.present(clear=False, update=True)
 
-    exp.keyboard.wait()
-    control.end()
+# Leave on screen until a key is pressed
+exp.keyboard.wait()
+control.end()
