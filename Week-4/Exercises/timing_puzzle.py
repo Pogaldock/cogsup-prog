@@ -8,23 +8,22 @@ control.initialize(exp)
 fixation = stimuli.FixCross()
 text = stimuli.TextLine("Fixation removed")
 
-t0 = exp.clock.time
-
+t0 = exp.clock.time #time before presentation
 fixation.present()
-td = exp.clock.time - t0
+td = exp.clock.time - t0 #duration of presentation
 
-exp.clock.wait(1000 - td)
+exp.clock.wait(1000 - td) #corrected timing
+
+t1 = exp.clock.time #duration of full presentation + wait cycle
+fix_duration = (t1 - t0)/1000 #calculation of cycle in seconds
 
 t0_1 = exp.clock.time
-
 text.present()
 td = exp.clock.time - t0_1
 
-t1 = exp.clock.time
-fix_duration = (t1 - t0)/1000
-
 exp.clock.wait(1000 - td)
 
+#present results
 units = "second" if fix_duration == 1.0 else "seconds"
 duration_text = f"Fixation was present on the screen for {fix_duration} {units}"
 

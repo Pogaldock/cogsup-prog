@@ -13,6 +13,7 @@ control.start(subject_id=1)
 fixation.present(clear=True, update=True)
 exp.clock.wait(500)
 
+fixation.present(clear=True, update=True)
 square.present(clear=False, update=True)
 exp.keyboard.wait()
 
