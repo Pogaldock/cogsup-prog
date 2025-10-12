@@ -1,72 +1,47 @@
-from expyriment import design, control, stimuli
+from expyriment import design, control, stimuli, misc
 from expyriment.misc.constants import K_SPACE
+from drawing_functions import *
 
-exp = design.Experiment(background_colour=(255,255,255))
-control.set_develop_mode()
-control.initialize(exp)
+""" Stimuli """
+RADIUS = 50; DISTANCE = RADIUS * 3; SPREAD = RADIUS * 9
+
+def make_circles(radius=RADIUS):
+    positions = range(-SPREAD // 2, SPREAD // 2, DISTANCE) # x-positions: [-225, -75, 75]
+    circles = [stimuli.Circle(radius=radius, position=(x_pos, 0)) for x_pos in positions]
+    return circles
+
+def add_tags(circles, tag_radius):
+    tag_colors = [misc.constants.C_YELLOW, misc.constants.C_RED, misc.constants.C_BLUE]
+    tag_circles = [stimuli.Circle(radius=tag_radius, colour=col) for col in tag_colors]
+    for circle, tag in zip(circles, tag_circles):
+        tag.plot(circle)
 
 
-def load(stims):
-    for stim in stims:
-        stim.preload()
+def run_trial(circle_frames=12, ISI=0, tags=False):
+    # Create circles
+    circles = make_circles()
 
-
-def make_circles(stims):
-    canvas = stimuli.Canvas(size=exp.screen.size)
-    for stim in stims:
-        stim.plot(canvas)
-    canvas.present(clear=True, update=True)
-
-def present_for(stims, nb_frames):
-    make_circles(stims)
-    exp.clock.wait(nb_frames * 16.67) 
-
-# --- Trial function ---
-def run_trials(rad, isi, col_tags=False):
+    if tags: add_tags(circles, tag_radius=RADIUS // 5)
+    load(circles)
     while True:
-        positions = [(-165,0),(-55,0),(55,0),(165,0)]
-        circles = [stimuli.Circle(radius=rad, position=pos, colour=(0,0,0)) for pos in positions]
-
-        # define colour tags
-        overlays = [
-            stimuli.Circle(radius=10, position=positions[0], colour=(255,222,33)),
-            stimuli.Circle(radius=10, position=positions[1], colour=(255,0,0)),
-            stimuli.Circle(radius=10, position=positions[2], colour=(0,255,0)),
-            stimuli.Circle(radius=10, position=positions[3], colour=(255,222,33))
-        ]
-
-        load(circles)
-
-
+        for dx in (SPREAD, -SPREAD):
+            present_for(exp, circles, num_frames=circle_frames)
+            present_for(exp, [], num_frames=ISI)
+            circles[0].move((dx, 0))
         if exp.keyboard.check(K_SPACE):
             break
 
-        nb_frames = 25  # Hardcode number of frames
 
-        if isi == 0:
-            #low isi
-            present_for([circles[0], circles[1], circles[2]] +
-                        (overlays[0:3] if col_tags else []), nb_frames)
-            present_for([circles[1], circles[2], circles[3]] +
-                        (overlays[1:4] if col_tags else []), nb_frames)
-        else:
-            #high isi
-            present_for([circles[0], circles[1], circles[2]] +
-                        (overlays[0:3] if col_tags else []), nb_frames)
-            exp.clock.wait(isi * 16.67)
-            canvas = stimuli.Canvas(size=exp.screen.size, colour=exp.background_colour)
-            canvas.present(clear=True, update=True)
-            exp.clock.wait(isi * 16.67)
-            present_for([circles[1], circles[2], circles[3]] +
-                        (overlays[1:4] if col_tags else []), nb_frames)
-            canvas.present(clear=True, update=True)
-            exp.clock.wait(int(isi * 16.67))
 
-           
+control.set_develop_mode()
 
-#press space between each run of the function
-run_trials(rad=50, isi=3, col_tags=False)
-run_trials(rad=50, isi=20, col_tags=False)
-run_trials(rad=50, isi=0, col_tags=True)
+bg = misc.constants.C_WHITE
+fg = misc.constants.C_BLACK
 
+exp = design.Experiment("Ternus", background_colour=bg, foreground_colour=fg)
+control.initialize(exp)
+control.start(subject_id=1)
+trials = [{'ISI': 0}, {'ISI': 18}, {'ISI': 18, 'tags': True}]
+for trial_params in trials:
+    run_trial(**trial_params)
 control.end()
